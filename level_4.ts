@@ -6,20 +6,18 @@
 
 // Что получится?
 
-// type ElementType<T> =
-//     T extends Array<infer U>
-//         ? U
-//         : never;
+// type ElementType<T> = T extends Array<infer U> ? U : never;
 
 // Напиши результат:
+//infer извлекает только тип внутренних элементов поэтому
+// type A = ElementType<string[]>; // string
+// type B = ElementType<number[]>; // number
+// type C = ElementType<boolean>; // never //это не массив
 
-// type A = ElementType<string[]>;
-// type B = ElementType<number[]>;
-// type C = ElementType<boolean>;
+
+
 // 2. Напиши свой ReturnType
-
 // Без встроенного ReturnType.
-
 // Нужно:
 
 // function getUser() {
@@ -28,8 +26,7 @@
 //         name: "Murad"
 //     };
 // }
-// type User =
-//     MyReturnType<typeof getUser>;
+// type User = MyReturnType<typeof getUser>;
 
 // ↓
 
@@ -40,9 +37,11 @@
 
 // Напиши:
 
-// type MyReturnType<T> = ???
-// 3. Напиши свой Parameters
+// type MyReturnType<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer R ? R : never;
 
+
+
+// 3. Напиши свой Parameters
 // Без встроенного Parameters.
 
 // Нужно:
@@ -59,15 +58,16 @@
 
 // ↓
 
-// [number, string]
+// [number, string];
 
 // Напиши:
 
-// type MyParameters<T> = ???
+// type MyParameters<T> = T extends (...args: infer P) => any ? P : never;
+
+
+
 // 4. Напиши свой Awaited
-
 // Без встроенного Awaited.
-
 // Нужно:
 
 // type A =
@@ -82,10 +82,13 @@
 // Подсказка:
 
 // Promise<infer U>
+
+// type MyAwaited<T> = T extends Promise<infer U> ? U : never;
+
+
+
 // 5. infer + tuple
-
 // Что получится?
-
 // type First<T> =
 //     T extends [
 //         infer U,
@@ -94,16 +97,18 @@
 //         ? U
 //         : never;
 // type A =
-//     First<[1, 2, 3]>;
+//     First<[1, 2, 3]>; // 1
 // type B =
-//     First<["a", "b"]>;
+//     First<["a", "b"]>; // "a"
 // type C =
-//     First<[]>;
-// 6. infer + tuple
+//     First<[]>; // never
 
+
+
+// 6. infer + tuple
 // Напиши тип:
 
-// type Last<T> = ???
+// type Last<T> = T extends [...infer Rest, infer LastItem]?LastItem:never
 
 // Чтобы:
 
@@ -119,10 +124,11 @@
 // ↓
 
 // "b"
+
+
+
 // 7. Exclude своими руками
-
 // Встроенный использовать нельзя.
-
 // Нужно:
 
 // type A =
@@ -138,10 +144,13 @@
 // Подсказка:
 
 // T extends U
+
+// type MyExclude<T,U> = T extends U ? never : T
+
+
+
 // 8. Omit своими руками
-
 // Без встроенного Omit.
-
 // Используя:
 
 // keyof
@@ -167,11 +176,15 @@
 //     id: number;
 //     name: string;
 // }
-// 9. Template Literal Types
 
+// type MyOmit<T,K extends keyof T> = Pick<T,Exclude<keyof T,K>>
+
+
+
+// 9. Template Literal Types
 // Создай тип:
 
-// type EventName = ???
+// type EventName = `on${string}`
 
 // Чтобы работало:
 
@@ -185,17 +198,20 @@
 
 // const c: EventName =
 //     "click";
-// 10. Template Literal Types
+//еще что то в духе toCapitalize сделать вообще щык,а так вроде есть Capitalize но он не подходит
 
+
+
+// 10. Template Literal Types
 // Что получится?
 
-// type Position =
-//     `${"top" | "bottom"}-${"left" | "right"}`;
+// type Position = `${"top" | "bottom"}-${"left" | "right"}`;
 
 // Напиши итоговый union.
+// type Position = "top-left" | "top-right" | "bottom-left" | "bottom-right"
+
 
 // 11. Key Remapping
-
 // Что получится?
 
 // type User = {
@@ -204,23 +220,21 @@
 // };
 
 // type Prefixed = {
-//     [K in keyof User as `api_${string & K}`]:
-//         User[K];
+//     [K in keyof User as `api_${string & K}`]: User[K];
 // };
 
 // Напиши итоговый тип.
+// {
+//     "api_id": number;
+//     "api_name": string;
+// };
+
+
 
 // 12. Boss Fight 😈
-
 // Что получится?
 
-// type Flatten<T> =
-//     T extends Array<infer U>
-//         ? U
-//         : T;
-// type A =
-//     Flatten<string[]>;
-// type B =
-//     Flatten<number>;
-// type C =
-//     Flatten<boolean[]>;
+// type Flatten<T> = T extends Array<infer U> ? U : T;
+// type A = Flatten<string[]>; //string
+// type B = Flatten<number>; //number
+// type C = Flatten<boolean[]>; //boolean
